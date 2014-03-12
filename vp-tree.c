@@ -16,11 +16,11 @@
  */
 
 
-#include &lt;stdio.h>
-#include &lt;stdlib.h>
-#include &lt;limits.h>
-#include &lt;math.h>
-#include &lt;assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <math.h>
+#include <assert.h>
 
 #include "vptree.h"
 #include "qsort.h"
@@ -108,7 +108,7 @@ readDataSet(int n, int dim, char *dataFile)
 
     ptr = dataSet->points;
 
-    for (i=0; i&lt;(dataSet->nPoints)*(dataSet->dimension); i++) {
+    for (i=0; i<(dataSet->nPoints)*(dataSet->dimension); i++) {
 	fscanf(fp,"%lf",&f);
 	*ptr++ = f;
     }
@@ -137,7 +137,7 @@ sqrDist(double *p1, double *p2, int dim)
     int    i;
 
     dist = pow( ((*p1++) - (*p2++)), 2.0 );
-    for (i=1; i&lt;dim; i++)
+    for (i=1; i<dim; i++)
 	dist += pow( ((*p1++) - (*p2++)), 2.0 );
     return dist;
 }
@@ -197,7 +197,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
     vpNode->dataID  = NULL;
 
     // should we stop?
-    if (nPoints &lt;=_MAX_POINTS_NODE) {
+    if (nPoints <= _MAX_POINTS_NODE) {
 
 	vpNode->isLeaf = _TRUE;
 
@@ -249,7 +249,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
 
     // first find a random "subset" in the dataset
 
-    if (nPoints &lt;= _NUM_PT_RANDOM_SUBSET) {
+    if (nPoints <= _NUM_PT_RANDOM_SUBSET) {
 
 	// no need to find a random subset
 
@@ -259,7 +259,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
 	if (subset == NULL)
 	    errexit("Err : Not enough memory for allocation!\n\n");
 
-	for (i=0; i&lt;nSubset; i++)
+	for (i=0; i < nSubset; i++)
 	    subset[i] = i;
 
     } else {
@@ -274,7 +274,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
 
 	srand(time(NULL));
 
-	for (i=0; i&lt;nSubset; i++)
+	for (i=0; i < nSubset; i++)
 	    subset[i] = rand() % nPoints;
     }
 
@@ -288,7 +288,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
     bestStddev = 0.0;
     bestVP     = -1;
 
-    for (j=0; j&lt;_NUM_CAND_VP; j++) {
+    for (j=0; j  < _NUM_CAND_VP; j++) {
 
 	// randomize a candidate vp
 	vp    = rand() % nPoints;
@@ -296,14 +296,14 @@ buildVPNode(double *points, int *dataID, int nPoints,
 
 	// measure the standard dev. against this vp
 	dist = 0.0;
-	for (i=0; i&lt;nSubset; i++)
+	for (i=0; i  < nSubset; i++)
 	    dist += sqrDist( ptrVP, 
 	                     points + subset[i]*dimension, 
 	                     dimension );
 	stddev = sqrt(dist/nSubset);
 
 	// largest?
-	if (bestStddev &lt; stddev) {
+	if (bestStddev  < stddev) {
 	    bestStddev = stddev;
 	    bestVP     = vp;
 	}
@@ -349,7 +349,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
     ptrPt   = points + dimension;	// skip the 1st vp
     ptrDist = distances;
 
-    for (i=0; i&lt;nPoints-1; i++) {
+    for (i=0; i< nPoints-1; i++) {
 
 	*ptrDist++  = sqrt( sqrDist(points, ptrPt, dimension) );
 	 ptrPt     += dimension;
@@ -374,7 +374,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
     if (sortList == NULL)
 	errexit("Err : Not enough memory for allocation!\n\n");
 
-    for (i=0; i&lt;nPoints-1; i++)
+    for (i=0; i<nPoints-1; i++)
 	sortList[i] = i;
 
     // sorting (find the sort index)
@@ -391,7 +391,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
     ptrPt = tmpPt;
     ptrID = tmpID;
 
-    for (i=0; i&lt;nPoints-1; i++) {
+    for (i=0; i<nPoints-1; i++) {
 
 	memcpy( ptrPt,
 	        points + (sortList[i]+1)*dimension,	// +1 to skip 1st vp
@@ -414,9 +414,9 @@ buildVPNode(double *points, int *dataID, int nPoints,
     free(tmpID);
 
     #ifdef _DEBUG
-    for (i=0; i&lt;nPoints-1; i++)
+    for (i=0; i<nPoints-1; i++)
 	printf("dist[%02d] = %f\n",i,distances[i]);
-    for (i=0; i&lt;nPoints-1; i++)
+    for (i=0; i<nPoints-1; i++)
 	printf("sort[%02d] = %d\n",i,sortList[i]);
     #endif
 
@@ -435,7 +435,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
 
     childIndex = 1;
 
-    for (i=0; i&lt;numBranch-1; i++) {
+    for (i=0; i<numBranch-1; i++) {
 
 	// last point in this branch
 	lastIndex = 1 + (nPoints-1)*(i+1) / numBranch - 1;
@@ -470,7 +470,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
 
     childIndex = 1;
 
-    for (i=0; i&lt;numBranch; i++) {
+    for (i=0; i<numBranch; i++) {
 
 	// last point in this branch
 	lastIndex = 1 + (nPoints-1)*(i+1) / numBranch - 1;
@@ -506,7 +506,7 @@ buildVPNode(double *points, int *dataID, int nPoints,
 // External Function :
 //
 // Building the VP Tree
-// - if numBranch    &lt;= 1, use _DEFAULT_BRANCH
+// - if numBranch    <= 1, use _DEFAULT_BRANCH
 // - note that ordering of points in dataSet is changed after calling
 //   (return the root node)
 
@@ -530,14 +530,14 @@ buildVPTree(DataSet *dataSet, int numBranch)
     ///////////////////////////////////////////
     // (2) Initialization
 
-    if (numBranch &lt;= 1)
+    if (numBranch <= 1)
 	numBranch  = _DEFAULT_BRANCH;
 
     vpTree->numBranch = numBranch;
     vpTree->dimension = dataSet->dimension;
 
     // dataIDs' keep track of where the points goes in the VP tree
-    for (i=0; i&lt;dataSet->nPoints; i++)
+    for (i=0; i<dataSet->nPoints; i++)
 	dataID[i] = i;
 
 
@@ -617,8 +617,8 @@ readVPNode(FILE *fp, int numBranch, int dimension, int *nPoints)
 	ptrID = vpNode->dataID;
 
 	// Read the points and dataID
-	for (i=0; i&lt;*nPoints; i++) {
-	    for (j=0; j&lt;dimension; j++) {
+	for (i=0; i<*nPoints; i++) {
+	    for (j=0; j<dimension; j++) {
 		fscanf(fp,"%lf",&f);
 		*ptrPt++ = f;
 	    }
@@ -654,7 +654,7 @@ readVPNode(FILE *fp, int numBranch, int dimension, int *nPoints)
 	ptrPt = vpNode->points;
 
 	// Read the vp and its dataID
-	for (j=0; j&lt;dimension; j++) {
+	for (j=0; j<dimension; j++) {
 	    fscanf(fp,"%lf",&f);
 	    *ptrPt++ = f;
 	}
@@ -667,7 +667,7 @@ readVPNode(FILE *fp, int numBranch, int dimension, int *nPoints)
 		//*(ptrPt-3),*(ptrPt-2),*(ptrPt-1),vpNode->dataID[0]);
 
 	// Read the children and medians
-	for (i=0; i&lt;numBranch; i++) {
+	for (i=0; i<numBranch; i++) {
 
 	    // read child
 	    vpNode->child[i] = readVPNode(fp,numBranch,dimension,&k);
@@ -786,8 +786,8 @@ writeVPNode(FILE *fp, VPNode *vpNode, int numBranch, int dimension)
 	fprintf(fp,"%s %d\n",_VPTREE_LEAF,nPoints);
 
 	// data points
-	for (i=0; i&lt;nPoints; i++) {
-	    for (j=0; j&lt;dimension; j++)
+	for (i=0; i<nPoints; i++) {
+	    for (j=0; j<dimension; j++)
 		fprintf(fp,"%f ",*ptrPt++);
 	    fprintf(fp,"%d\n",*ptrID++);
 	}
@@ -806,11 +806,11 @@ writeVPNode(FILE *fp, VPNode *vpNode, int numBranch, int dimension)
 	fprintf(fp,"%s\n",_VPTREE_INTERNAL);
 
 	// vantage point(s)
-	for (i=0; i&lt;dimension; i++)
+	for (i=0; i<dimension; i++)
 	    fprintf(fp,"%f ",*ptrPt++);
 	fprintf(fp,"%d\n",vpNode->dataID[0]);
 
-	for (i=0; i&lt;numBranch; i++) {
+	for (i=0; i<numBranch; i++) {
 	    nPoints += writeVPNode(fp,vpNode->child[i],numBranch,dimension);
 	    if (i != numBranch-1)
 		fprintf(fp,"median : %f\n",vpNode->medians[i]);
@@ -890,21 +890,21 @@ searchKNNVPNode(VPNode *vpNode, double *queryPt,
 
 	ptrPt = vpNode->points;
 
-	for (i=0; i&lt;vpNode->nPoints; i++) {
+	for (i=0; i<vpNode->nPoints; i++) {
 
 	    // compute distance
 	    dist = sqrt( sqrDist(queryPt,ptrPt,dimension) );
 
 	    // shorter?
 	    if (kMinDist[k-1] > dist) {
-	     	for (x=0; x&lt;k-1; x++)
+	     	for (x=0; x<k-1; x++)
 			if (kMinDist[x] > dist)
 				break;
 	     	index = x;
 	     	for (x=k-1; x>index; x--) {
 			kMinDist[x] = kMinDist[x-1];	
 			resultID[x] = resultID[x-1];
-			for (y=0; y&lt;dimension; y++)
+			for (y=0; y<dimension; y++)
 				resultPt[x*dimension+y] = resultPt[(x-1)*dimension+y];
 	     	}
 
@@ -924,14 +924,14 @@ searchKNNVPNode(VPNode *vpNode, double *queryPt,
 
 	// shorter?
 	if (kMinDist[k-1] > dist) {
-	     for (i=0; i&lt;k-1; i++)
+	     for (i=0; i<k-1; i++)
 		if (kMinDist[i] > dist)
 			break;
 	     index = i;
 	     for (i=k-1; i>index; i--) {
 		kMinDist[i] = kMinDist[i-1];	
 		resultID[i] = resultID[i-1];
-		for (x=0; x&lt;dimension; x++)
+		for (x=0; x<dimension; x++)
 			resultPt[i*dimension+x] = resultPt[(i-1)*dimension+x];
 	     }
 
@@ -941,12 +941,12 @@ searchKNNVPNode(VPNode *vpNode, double *queryPt,
 	}
 
 	// Prune the near part
-	for (i=0; i&lt;numBranch-1; i++)
+	for (i=0; i<numBranch-1; i++)
 	    if (kMinDist[k-1] + vpNode->medians[i] >= dist)
 		break;
 
 	// Prune the far part
-	for (; i&lt;numBranch; i++) {
+	for (; i<numBranch; i++) {
 
 	    nodeCount += 
 		searchKNNVPNode( vpNode->child[i], queryPt,
@@ -954,7 +954,7 @@ searchKNNVPNode(VPNode *vpNode, double *queryPt,
 		                 numBranch, dimension, k );
 
 	    if ( i != numBranch-1
-	      && kMinDist[k-1] + dist &lt; vpNode->medians[i] )
+	      && kMinDist[k-1] + dist < vpNode->medians[i] )
 		break;
 	}
     }
@@ -994,7 +994,7 @@ knnsearch(VPTree *vpTree, double *queryPt, int k,
 	return;
     }
 
-    for (i=0; i &lt; k; i++)
+    for (i=0; i < k; i++)
 	kMinDist[i] = _LARGE_VALUE;
 
 
@@ -1034,7 +1034,7 @@ freeVPNode(VPNode *vpNode, int numBranch)
 
 	// free the child
 	if (!vpNode->isLeaf && vpNode->child) {
-	    for (i=0; i&lt;numBranch; i++)
+	    for (i=0; i<numBranch; i++)
 		if (vpNode->child[i])
 		    freeVPNode(vpNode->child[i],numBranch);
 	}
@@ -1078,6 +1078,6 @@ printPt(FILE *out, double *pt, int dim)
     int i;
 
     fprintf(out,"%f",pt[0]);
-    for (i=1; i&lt;dim; i++)
+    for (i=1; i<dim; i++)
 	fprintf(out," %f",pt[i]);
 }
