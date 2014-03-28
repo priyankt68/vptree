@@ -13,7 +13,7 @@ int main()
  float a = 5.0;
  float b = 2.0;
  std::ofstream MyFile;
- MyFile.open ("data.csv", ios::out | ios::ate | ios::app) ;
+ MyFile.open ("data/data.csv", ios::out | ios::ate | ios::app) ;
     for (int i=0;i<50;i++)
     {
     	float x =((float)rand()/(float)(RAND_MAX)) * a;
