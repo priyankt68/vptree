@@ -6,6 +6,9 @@
 #include <string.h>
 #include <math.h>
 #include <vector>
+#include "vptree.h"
+
+using namespace std;
 struct Point
 {
     /* data */
@@ -23,7 +26,7 @@ int main()
 {
 std::vector<Point> points;
 printf("Reading coordinates database...\n");
-FILE* file = fopen("data.txt", "rt");
+FILE* file = fopen("data.csv", "rt");
     for(;;) 
     {
         char buffer[100];
@@ -47,4 +50,6 @@ printf("My points are \n");
     for(std::vector<Point>::iterator it=points.begin(); it!=points.end(); ++it)  
         printf("%2.1f, %2.1f \n", (it->x),(it->y));
   
+
+   VpTree<Point, distance> tree;
 }
