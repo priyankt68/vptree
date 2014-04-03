@@ -80,6 +80,8 @@ public:
         delete _root;
         _items = items;
         _root = buildFromPoints(0, items.size());
+
+        /*Do depth first search here to understand the structure of the vantage point tree*/
     }
     
     // Function that uses the tree to find the k nearest neighbors of target
@@ -187,6 +189,17 @@ private:
         // Return result
         return node;
     }
+
+    // Helper function to visualise the tree constructed
+
+    /*void visualise(Node* node, const T& target)
+    {
+
+        if( node == NULL) return; //indicates the we're done here
+
+        else
+            printf("%d\n", node->x,node->y);
+    }*/
     
     // Helper function that searches the tree    
     void search(Node* node, const T& target, int k, std::priority_queue<HeapItem>& heap)
