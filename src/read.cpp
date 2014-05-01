@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -23,13 +24,17 @@ void QueryPerformanceCounter( uint64_t* val )
     *val = tv.tv_sec * 1000000 + tv.tv_usec;
 }
 */
+//void printdata(std::vector<Point>& temp);
 
-struct HeapItem {
+struct HeapItem 
+    {
         HeapItem( int index, double dist) :
         index(index), dist(dist) {}
         int index;
         double dist;
-        bool operator<(const HeapItem& o) const {
+        bool operator<(const HeapItem& o) const   // operator overloading
+
+        {
             return dist < o.dist;
         }
     };
@@ -76,6 +81,41 @@ void linear_search( const std::vector<Point>& items, const Point& target, int k,
     std::reverse( distances->begin(), distances->end() );
 }
 
+void printdata(std::vector<Point>& temp)
+{
+    for(std::vector<Point>::iterator it=temp.begin(); it!=temp.end(); ++it)  
+        printf("%2.1f, %2.1f \n", (it->x),(it->y));
+}
+
+void build_vp_tree(std::vector<Point>& tem, int s)
+{
+
+
+    /*Segregating data for the sake of memory colaescing in gpus and openmp thread memory accesses.*/
+    std::vector<float> pointx;
+    std::vector<float> pointy;
+    Point point;
+        for(std::vector<Point>::iterator it=tem.begin(); it!=tem.end(); ++it)
+        {
+            pointx.push_back(it->x);
+            pointy.push_back(it->y);
+        }
+
+        /*Segregating data for the sake of colaescing memeory accesses in GPUs*/
+        for(std::vector<float>::iterator itx=pointx.begin(),ity=pointy.begin(); itx!=pointx.end(),ity!=pointy.end(); ++itx,++ity)
+            std::cout << *itx <<","<<*ity<< std::endl;
+        
+
+
+}
+
+
+
+
+
+
+
+
 int main()
 {
 std::vector<Point> points;
@@ -95,20 +135,33 @@ FILE* file = fopen("../data/data.csv", "rt");
         sscanf(buffer + comma + 1, "%lg", &point.y);
         comma = point.coordinates.rfind(",", comma-1);
         sscanf(buffer + comma + 1, "%lg", &point.x);
-    //xcz    printf("%lg, %lg\n", point.x, point.y);
+       // printf("%lg, %lg\n", point.x, point.y);
         points.push_back(point);
         //if(points.size()>50000)break;
-
+        
     }
+
+        //printdata(points);
+
+    std::cout << "Array Size: " << points.size() << std::endl;
+    int pointssize = points.size();
+
+      // segregatedata(points);
+
+        /*Function to build vantage point tree.   Returns a permuted structure representing vantage point tree built in-place procedure.*/
+    build_vp_tree(points, pointssize);
+
+
 
 
 /*
 printf("My points are \n");
     for(std::vector<Point>::iterator it=points.begin(); it!=points.end(); ++it)  
         printf("%2.1f, %2.1f \n", (it->x),(it->y));
-  */
 
-/*Starting of process of construction
+*/
+
+/* Starting of process of construction
 
                             in vantage point trees */
 
@@ -127,7 +180,6 @@ printf("My points are \n");
 
     tree.create( points )  ; // so in vector -> Point , every point contains: double x , double y
 
-    // printf("%d\n", tree._root.index);
 
     end = omp_get_wtime();
   // QueryPerformanceCounter( &end );    // end performance to create a tree
@@ -135,14 +187,15 @@ printf("My points are \n");
  /*Creation of the tree is over at this point*/
 
     printf("create took %f \n",(end- start));
-    file1<< NoP << "\t" << (end-start);
+//    file1<< NoP << "\t" << (end-start);
+int c=0;
+for (std::vector<Point>::iterator it=points.begin(); it!=points.end(); ++it)
+{
+   // std::cout << ' ' << it->x << ',' << it->y << std::endl;
+  //  c++;     // counting the number of points in total.
+}
 
-
-/* Visualising the tree */
-
-   // tree.visualise();    
-
-
+    //std::cout << "Number of points:" << c << std::endl;
 
 /*Starting of search process 
 
@@ -150,21 +203,74 @@ printf("My points are \n");
 
     //Randomly selecting 10% of the dataset to query
 
+    file = fopen("../data/data.csv", "rt");
 
-    Point point;    //query point
+    //Randomly shuffling to
+    std::random_shuffle ( points.begin(), points.end() );    // #include<algorithm>
+std::vector<Point>::iterator iter = points.begin();
+    std::vector<Point> queryset;
+    for (int i=0;i< ((points.size())/10);i++)
+    {
+        
+        Point point;    //query point
+        point.x = iter->x ;  // query point being: ( 3.1 , 1.1 )
+        point.y = iter->y;
+        queryset.push_back(point);
+        ++iter;      
+    }
+    /*for (std::vector<Point>::iterator iter = points.begin(); iter!= points.end(); ++iter)
+    {
+        Point point;    //query point
+        point.x = iter->x ;  // query point being: ( 3.1 , 1.1 )
+        point.y = iter->y;
+        queryset.push_back(point);
+    }*/
+
+   // for (std::vector<Point>::iterator iter = queryset.begin(); iter!= queryset.end(); ++iter)
+    //{
+       // std::cout << ' ' << iter->x << ',' << iter->y << std::endl;
+      //  c++;
+    //}
+
+   // printf("%d\n Queryset %ld",c, queryset.size() );
+   /* Point point;    //query point
     point.x = 3.1 ;  // query point being: ( 3.1 , 1.1 )
     point.y = 1.1;
+*/
+
 
     std::vector<Point> results;
     std::vector<double> distances;
 
-    start = omp_get_wtime();
+    //std::ofstream file1;
 
-    tree.search( point, 8, &results, &distances );
+    file1.open ("../data/serial_vs_parallel.csv") ; //ios::out | ios::ate | ios::app
 
-    end = omp_get_wtime();
+    double startp = omp_get_wtime();
+#pragma omp parallel for
+    for (int i = 0; i < queryset.size(); ++i)
+    {
+        tree.search(queryset[i],8,&results,&distances);
+    }
 
-    printf("Search took %f\n", (end-start));
+    double endp = omp_get_wtime();
+
+    printf("Parallel Search took %f\n", (endp-startp));
+
+
+double starts = omp_get_wtime();
+//#pragma omp parallel for 
+    for (int i = 0; i < queryset.size(); ++i)
+    {
+        tree.search(queryset[i],8,&results,&distances);
+    }
+
+double ends = omp_get_wtime();
+
+    printf("serial Search took %f\n", (ends - starts));
+
+file1<< queryset.size() << "," << (endp-startp) << "," << (ends-starts) << std::endl ;
+
 
     for( int i = 0; i < results.size(); i++ ) 
         printf("%s %lg\n", results[i].coordinates.c_str(), distances[i]);
@@ -172,17 +278,17 @@ printf("My points are \n");
     printf("---\n");
     //QueryPerformanceCounter( &start );
 
-    start = omp_get_wtime();
+  //  start = omp_get_wtime();
 
       
-    linear_search( points, point, 8, &results, &distances );
+    //linear_search( points, point, 8, &results, &distances );
 
-    end = omp_get_wtime();
+    //end = omp_get_wtime();
    // QueryPerformanceCounter( &end );
-    printf("Linear search took %f\n", (end-start));
+   // printf("Linear search took %f\n", (end-start));
 
-    for( int i = 0; i < results.size(); i++ )
-        printf("%s %lg\n", results[i].coordinates.c_str(), distances[i]);
+    //for( int i = 0; i < results.size(); i++ )
+      //  printf("%s %lg\n", results[i].coordinates.c_str(), distances[i]);
     
 
 
