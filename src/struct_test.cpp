@@ -104,15 +104,15 @@ void random_point(point_list pts[],int j,int s)
 
     std:: cout << "After the swapped element with the index = " << r << std::endl;
     std:: cout << "Random index selected " << r << std::endl;
-
-    
+  
 }
 
 /* 
 Finds the (pp-1)st smallest distance among the distances from (pts.x[j], pts.y[j]) of the points 
 in pts with indices in [j+1, j+s-1] and stores this distance in pr. Note that this is the same 
 as finding the ppth smallest distance among the distances from (pts.x[j], pts.y[j]) among the 
-points in pts with indices [j, j+s-1], so it chooses the desired pivot distance. */
+points in pts with indices [j, j+s-1], so it chooses the desired pivot distance. 
+*/
 
 
 void select_by_distance(point_list pts[], int j, int s, int pivot, float *pr)  // check the last parameter here and      UPDATE: (Seems to be correct as of now, but give a thorough check)
@@ -123,54 +123,70 @@ void select_by_distance(point_list pts[], int j, int s, int pivot, float *pr)  /
     std :: cout << " j+1  : " << j+1 << std::endl;
     std :: cout << " j+s-1  : " << j+s-1 << std::endl;
     //distance array
-    float dist[s];
-    int i=0;
-    for (int index = j+1; index <= j+s-1; ++index)
-    {   
-       
-        dist[i++] = sqrt( ( pow(pts[index].x - pts[j].x,2) ) + ( pow(pts[index].y - pts[j].y,2) ) ) ;    // dist array contains the 
-                 
-    }
+    int start = j+1;
+    int end   = j+s-1;
 
-    float temp[s];
+    int dist_length =  (end - start) + 1;
+
+    std :: cout << " dist_length = " << dist_length << std::endl;
+
+    float dist[dist_length];
+    
+    for ( int index = start ; index <= end; ++index)
+    {   
+       dist[index] = sqrt( ( pow(pts[index].x - pts[j].x,2) ) + ( pow(pts[index].y - pts[j].y,2) ) ) ;    // dist array contains the 
+    }
+    ///std :: cout << "index= " << index << std::endl;
+
+     for (int k = start; k <= end ; ++k)
+    {
+        std::cout << dist[k] << std::endl ;
+    }
+    float temp[dist_length];
     /* Checking for the distance */
 
-    for (int k = 0; k < i; ++k)
+    for (int k = start; k <= end ; ++k)
     {
         temp[k] =  dist[k];
         //std::cout << dist[k] << std::endl ;
     }
 
-    std::sort (temp, temp+i);
+    std::sort (temp, temp+dist_length);   // CODE REVIEW DONE UPTO HERE. (May 2, 2014)
 
-    std::cout << "After sorting the distances" << std::endl ;
-
-    for (int k = 0; k < i; ++k)
-    {
-        std::cout << temp[k] << std::endl ;
-    }
-    
     std::cout << "Original distances" << std::endl ;
 
-      for (int k = 0; k < i; ++k)
+      for (int k = start; k <= end ; ++k)
     {
-        std::cout << dist[k] << std::endl ;
+         std::cout << dist[k] <<"\t" << pts[k].x <<"\t" << pts[k].y << std::endl ;
     }
-    std::cout << "\n" << pivot << "th smallest element is : " << temp[pivot-1] << std::endl ;
+    std::cout << "\n" << pivot << "th smallest element is : " << temp[pivot] << std::endl ;
    
-    *pr = temp[pivot-1];
+   *pr = temp[pivot];
 
-    //free(temp);
+   //*pr=1.56;
     
-    int start = j+1;
-    int end = j+s-1;
+    
+
+ 
+  /*Partitions the points at indices [j+1, j+s-1] in pts so that the points at indices [j+1,j+pp-1] 
+ have distance at most pr from (pts.x[j], pts.y[j]), while the points at indices [j+pp, j+s-1] 
+ have distance at least pr. */
+ 
+  //  start = j+1;
+   // end   = j+s-1;
+
+    std :: cout << "Distance\t" << "X\t" << "Y\t" << std :: endl;
+    //for (int k = 0; k <= i; ++k)
+    //{
+     //   std::cout << dist[k-1] <<"\t" << pts[k].x <<"\t" << pts[k].y << std::endl ;
+   // }
 
     std::cout << "start for partitioning : " <<  start << "end for partitioning" << end << std::endl;
 
-    while (dist[start] <= *pr) 
-        start += 1;
-    while (*pr < dist[end]) 
-        end -= 1 ;
+    //while (dist[start] <= dist[pivot]) 
+       //    start += 1;
+   // while (dist[pivot] < dist[end]) 
+   //        end   -= 1;
 
     while (start < end)
     {
@@ -181,19 +197,17 @@ void select_by_distance(point_list pts[], int j, int s, int pivot, float *pr)  /
         start += 1;
         end   -= 1;
 
-        while (dist[start] <= *pr && start < end) 
+        while (dist[start] <= dist[pivot] && start < end) 
             start += 1;
-        while ( *pr < dist[end] && start < end)
+        while ( dist[pivot] < dist[end] && start < end)
             end   -= 1;
-
-
     }
 
     std :: cout << "partitioning index : (end) "<< end << std :: endl;
-    std :: cout << "pivot elemtn" << pivot << std::endl;
+    std :: cout << "pivot element " << pivot << std::endl;
 
-    std :: cout << "Distance\t" << "X\t" << "Y\t" << std :: endl;
-    for (int k = 0; k < i; ++k)
+    std :: cout << "ffDistance\t" << "X\t" << "Y\t" << std :: endl;
+   for (int k = j+1; k <= j+s-1 ; ++k)
     {
         std::cout << dist[k] <<"\t" << pts[k].x <<"\t" << pts[k].y << std::endl ;
     }
@@ -258,7 +272,7 @@ void build_vp_tree (point_list pts[], int n)
     vp.r = vp.y + vp.n;                                                 // pointing to the point after the space allocated for the data points x,y have been covered followed by floor(n/2)
     
 
-    for (i = 0; i < n - 1;) // check for n. (TO DO)                      // i and ii tracks the current point in the vantage point tree.
+    for (i = 0; i < n ;) // check for n. (TO DO)                      // i and ii tracks the current point in the vantage point tree.
     {
 
         std :: cout << "Starting for the next node" << std::endl;
@@ -295,7 +309,8 @@ void build_vp_tree (point_list pts[], int n)
                 t = t >> 1;
                 
                 /* Calculate position of pivot */
-                if (f - l < t) pp = t + f - l ; //todo  (t+f-l-1 )
+                if (f - l < t) 
+                    pp = t + f - l-1 ; //todo  (t+f-l-1 )
 
             }
 
@@ -306,7 +321,7 @@ void build_vp_tree (point_list pts[], int n)
                 
                 random_point(pts, j, s);                /* Chooses a random index r in [j, j+s-1] and swaps pts.x[r] with pts.x[j] and pts.y[r] with pts.y[j] */
 
-//                                                                            In the first pass, pts array (untampered, j=0, s= 15)
+//                                                                            In the first pass, pts array (untampered, j=0, s= 15, for n=15 )
                 
                 /*
                    Finds the (pp-1)st smallest distance among the distances from (pts.x[j], pts.y[j])
@@ -320,7 +335,7 @@ void build_vp_tree (point_list pts[], int n)
                                                                         */
 
 
-                /* This function needs to be implemented
+                /* 
                    Partitions the points at indices [j+1, j+s-1] in pts so that the points at indices
                    [j+1,j+pp-1] have distance at most pr from (pts.x[j], pts.y[j]), while the points
                    at indices [j+pp, j+s-1] have distance at least pr. */
