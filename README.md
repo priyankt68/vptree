@@ -15,6 +15,8 @@ Construction
 
  It is most efficient to simply build the tree by repeatedly partitioning the data. We build the tree from the top down from an array of items. For each node, we first choose a point at random, and then partition the list into two sets: The left children contain the points farther away than the median, and the right contains the points that are closer than the median. Then we recursively repeat this until we have run out of points. 
 
+The distance metric to be chosen should satisfy the triangle inequality.
+
 
 
 
