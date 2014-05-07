@@ -1,3 +1,12 @@
+/*
+May 6 : 
+partitioning
+QUICK SELECT FOR K-select algorithm from WIki  -->  take first elemtn as the pivot element.
+
+remove sqrt, pow
+
+*/
+
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -64,10 +73,80 @@ void swap(float *x, float *y)
     *y = temp; 
 }
 
+void partition_by_distance(point_list pts[],int j,int s, int pivotindex , float dist[] , int dist_length)
+{
+    //pivotindex = 3;
+    int pivotvalue = dist[pivotindex];
+
+    std::cout << "inside partition_by_distance pivot : "  << pivotvalue << std::endl ;
+    std::cout << "inside partition_by_distance distance array : " << std::endl ;
+
+    
+	
+    int start = j+1;
+    int starting_point = start;
+    int end = j+s-1;
+
+
+
+    std :: cout << "Elements before partitioning" << std :: endl;
+
+    std :: cout << "Distance\t" << "X\t" << "Y" << std :: endl;
+    
+    for (int k = start; k <= end ; ++k)
+    {
+        std::cout << dist[k] <<"\t" << pts[k].x <<"\t" << pts[k].y << std::endl;
+    }
+
+    swap(&pts[pivotindex].x,&pts[start].x);     // putting the pivot element to the front
+    swap(&pts[pivotindex].y,&pts[start].y); 
+    swap(&dist[pivotindex],&dist[start]); 
+
+// MAY 6 Check for HOARE's partitioning algorithm
+    do
+    {
+        do
+        {
+            start += 1;
+        }while (dist[start] < pivotvalue);
+
+        do
+        {
+            end -= 1;
+        } while (dist[end] > pivotvalue);
+
+        if( start < end)
+        {
+            swap( &pts[start].x , &pts[end].x );     // putting the pivot element to the front
+            swap( &pts[start].y , &pts[end].y ); 
+            swap( &dist[start] , &dist[end] ); 
+        }
+    }while(start < end);
+    
+
+    pts[starting_point].x = pts[end].x;
+    pts[starting_point].y = pts[end].y;
+    dist[starting_point] = dist[end];
+
+    pts[end].x = pts[pivotindex].x;
+    pts[end].y = pts[pivotindex].y;
+    dist[end] = dist[pivotindex];
+
+
+
+    std :: cout << "Elements after partitioning" << std :: endl;
+
+    std :: cout << "Distance\t" << "X\t" << "Y" << std :: endl;
+    
+    for (int k = starting_point; k <= dist_length ; ++k)
+    {
+        std::cout << dist[k] <<"\t" << pts[k].x <<"\t" << pts[k].y << std::endl;
+    }
+
+}
+
 
 /*Function to calculate the squared distances between two points */
-
-
 float distance( const point_list& p1, const point_list& p2 )
 {
     float a = (p1.x-p2.x);
@@ -131,41 +210,65 @@ void select_by_distance(point_list pts[], int j, int s, int pivot, float *pr)  /
     std :: cout << " dist_length = " << dist_length << std::endl;
 
     float dist[dist_length];
-    
+
+    int i=0;
+
     for ( int index = start ; index <= end; ++index)
     {   
-       dist[index] = sqrt( ( pow(pts[index].x - pts[j].x,2) ) + ( pow(pts[index].y - pts[j].y,2) ) ) ;    // dist array contains the 
-    }
+	// TODO : REMOVE DQRT, POW , USE MULTIPLY
+       dist[index] = sqrt( ( pow(pts[index].x - pts[j].x,2) ) + ( pow(pts[index].y - pts[j].y,2) ) ) ;    // dist array contains the  
+    }                                                                                                   // distance array is mapped through the index variable 'i' .
     ///std :: cout << "index= " << index << std::endl;
 
-     for (int k = start; k <= end ; ++k)
+     for (int index = start ; index <= end; ++index)
     {
-        std::cout << dist[k] << std::endl ;
+        std::cout << dist[index] << std::endl ;
     }
+
     float temp[dist_length];
     /* Checking for the distance */
 
-    for (int k = start; k <= end ; ++k)
+    for (int index = start ; index <= end; ++index)
     {
-        temp[k] =  dist[k];
+        temp[index] =  dist[index];
         //std::cout << dist[k] << std::endl ;
     }
-
-    std::sort (temp, temp+dist_length);   // CODE REVIEW DONE UPTO HERE. (May 2, 2014)
+	
+	// TODO :  IMPLEMENT LINEAR TIME SELECT ALGORITHM     MAY 6 
+    std::sort (temp,temp + (dist_length+1) );   
 
     std::cout << "Original distances" << std::endl ;
 
-      for (int k = start; k <= end ; ++k)
+      for (int index = start ; index <= end; ++index)
     {
-         std::cout << dist[k] <<"\t" << pts[k].x <<"\t" << pts[k].y << std::endl ;
+         std::cout << dist[index] << std::endl ;
     }
+
+     std::cout << "Sorted distances" << std::endl ;
+
+      for (int index = start ; index <= end; ++index)
+    {
+         std::cout << temp[index] << std::endl ;
+    }
+
     std::cout << "\n" << pivot << "th smallest element is : " << temp[pivot] << std::endl ;
    
-   *pr = temp[pivot];
+    *pr = temp[pivot];
 
    //*pr=1.56;
-    
-    
+// MAY 6 : CHECK FOR THE INDEX OF *PR SCANNING THE DISTANCE ARRAY.
+// AND THEN PASS IT ON TO PARTITION BY DISTANCE.
+    partition_by_distance(pts, j, s, pivot, dist , dist_length); 
+   
+   
+
+}
+
+ /*Partitions the points at indices [j+1, j+s-1] in pts so that the points at indices [j+1,j+pp-1] 
+ have distance at most pr from (pts.x[j], pts.y[j]), while the points at indices [j+pp, j+s-1] 
+ have distance at least pr. */
+ 
+
 
  
   /*Partitions the points at indices [j+1, j+s-1] in pts so that the points at indices [j+1,j+pp-1] 
@@ -175,31 +278,36 @@ void select_by_distance(point_list pts[], int j, int s, int pivot, float *pr)  /
   //  start = j+1;
    // end   = j+s-1;
 
-    std :: cout << "Distance\t" << "X\t" << "Y\t" << std :: endl;
+  //  std :: cout << "Distance\t" << "X\t" << "Y\t" << std :: endl;
     //for (int k = 0; k <= i; ++k)
     //{
      //   std::cout << dist[k-1] <<"\t" << pts[k].x <<"\t" << pts[k].y << std::endl ;
    // }
 
+
+
+/*
     std::cout << "start for partitioning : " <<  start << "end for partitioning" << end << std::endl;
 
-    //while (dist[start] <= dist[pivot]) 
-       //    start += 1;
-   // while (dist[pivot] < dist[end]) 
-   //        end   -= 1;
+     while (dist[start] > dist[pivot])        // Find a element bigger than the pivot
+           start += 1;
+        while (dist[pivot] < dist[end])          // Find a lement smaller than the pivot
+           end   -= 1;
 
-    while (start < end)
-    {
+    while (start < end)                       // if we haven't reached the end
+    {   
+       
+       
         swap ( &pts[start].x , &pts[end].x );
         swap ( &pts[start].y , &pts[end].y );
         swap ( &dist[start]  , &dist[end]  );
 
         start += 1;
-        end   -= 1;
+         end   -= 1;
 
-        while (dist[start] <= dist[pivot] && start < end) 
+        while (dist[start] > dist[pivot] && start < end) 
             start += 1;
-        while ( dist[pivot] < dist[end] && start < end)
+        while ( dist[pivot] <= dist[end] && start < end)
             end   -= 1;
     }
 
@@ -214,17 +322,7 @@ void select_by_distance(point_list pts[], int j, int s, int pivot, float *pr)  /
     
 
 }
-
- /*Partitions the points at indices [j+1, j+s-1] in pts so that the points at indices [j+1,j+pp-1] 
- have distance at most pr from (pts.x[j], pts.y[j]), while the points at indices [j+pp, j+s-1] 
- have distance at least pr. */
-void partition_by_distance(point_list pts[],int j,int s, float pr)
-{
-
-    //std::cout << "inside partition_by_distance : "  << pr << std::endl ;
-
-}
-
+*/
 void build_vp_tree (point_list pts[], int n)
 {
     int sum=0;
@@ -278,10 +376,13 @@ void build_vp_tree (point_list pts[], int n)
         std :: cout << "Starting for the next node" << std::endl;
 
         /* Size of full subtree at current level */
-        s = (t << 1) - 1;                                             //   n = 15 , t = 8 , s = 15 
+        s = (t << 1) - 1;                                             //   n = 7 , t = 4 , s = 7 
+
+        //std :: cout << "Size of the full subtree: " << s << std :: endl;
 
         /* Pivot position within a full subtree */
-        pp = t - 1;                                                   // pp = 7
+        pp = t - 1;                                                   // pp = 3
+
         std::cout << "Pivot inside build process :"  << pp << std::endl ;
 
         /* We're starting at the leftmost leaf */
@@ -294,6 +395,8 @@ void build_vp_tree (point_list pts[], int n)
         for (j = 0, ii = i; ii; ++j, ii = ii >> 1);                          // ii gets multiplied by two every time the iteration proceeds.       
         
         std :: cout << "Value of J before while loop even begins" << j << std :: endl; 
+
+
         /* Loop over subtrees at current level */
         while (j < n) 
         {
@@ -333,7 +436,7 @@ void build_vp_tree (point_list pts[], int n)
                                                         /*
                                                                             In the first pass, pts array, j=0, s=15, pp = 7
                                                                         */
-
+// MAY 6 : MAKE A FUNCTION TO COMPUTE DISTANCES SEPARATELY
 
                 /* 
                    Partitions the points at indices [j+1, j+s-1] in pts so that the points at indices
@@ -377,6 +480,7 @@ void build_vp_tree (point_list pts[], int n)
         }
     }
 }
+
 
 
 /*       MAIN()                   */
