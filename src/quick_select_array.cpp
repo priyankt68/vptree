@@ -15,6 +15,15 @@ void print(int *input)
     cout << endl;
 }
 
+
+/* Function to swap the elements */
+void swap(float *x, float *y)
+{
+    float temp = *x;
+    *x = *y ;
+    *y = temp; 
+}
+
 int partition(int* input, int p, int r)
 {
     int pivot = input[r];
@@ -41,24 +50,32 @@ int partition(int* input, int p, int r)
 
 int quick_select(int* input, int p, int r, int k)
 {
-    if ( p == r ) return input[p];
-    int j = partition(input, p, r);
+    if ( p == r ) return input[p];   // if the list just contains one element.
+
+    int j = partition(input, p, r);   // partition the elements with all elements
+
     int length = j - p + 1;
-    if ( length == k ) return input[j];
+
+    if ( length == k ) return input[j];          // we've reached the element.
+
     else if ( k < length ) return quick_select(input, p, j - 1, k);
+
     else  return quick_select(input, j + 1, r, k - length);
 }
 
 int main()
 {
-    int A1[] = { 100, 400, 300, 500, 200 };
-    cout << "1st order element " << quick_select(A1, 0, 4, 1) << endl;
-    int A2[] = { 100, 400, 300, 500, 200 };
-    cout << "2nd order element " << quick_select(A2, 0, 4, 5) << endl;
-    int A3[] = { 100, 400, 300, 500, 200 };
-    cout << "3rd order element " << quick_select(A3, 0, 4, 3) << endl;
-    int A4[] = { 100, 400, 300, 500, 200 };
-    cout << "4th order element " << quick_select(A4, 0, 4, 4) << endl;
-    int A5[] = { 100, 400, 300, 500, 200 };
-    cout << "5th order element " << quick_select(A5, 0, 4, 5) << endl;
+    
+    int a[] = { 1, 4, 3, 5, 2, 9,7,6};
+
+    cout << "5th smallest element :  " << quick_select(a, 0, 7, 5) << endl;
+
+    int b[] = {1};
+    cout << "1st smallest element :  " << quick_select(b, 0, 0, 1) << endl;
+
+    int c[] = {1,2,4};
+    cout << "2nd smallest element :  " << quick_select(c, 0, 2 , 2) << endl;
+
+    int d[] = {0,1,2,4,5,21,-1,-11,-22};                                      // handling negative queries as well. In vp tree, co-ordinates may be negative, in case geo-spatial queries.
+    cout << " 4th smallest element :  " << quick_select(d, 0, 9 , 4) << endl;
 }
