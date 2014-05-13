@@ -212,9 +212,6 @@ void partition_by_distance(point pts[],int j,int s, float pr)
 
 }
 
-
-
-
 /* Chooses a random index r in [j, j+s-1] and swaps pts.x[r] with pts.x[j] and pts.y[r] with 
 pts.y[j] */
 void random_point(point pts[],int j,int s)
@@ -482,7 +479,7 @@ int main()
 
     std::vector<point> points; // vector to temporarily store points
     std :: ifstream infile;
-    infile.open("../data/data.csv"); // open file
+    infile.open("../data/data.txt"); // open file
     if(infile)
     {
         std :: string s="";
@@ -490,7 +487,6 @@ int main()
         while(infile)
         {
         getline(infile,s);
-    
         char* pEnd;
         temp_point.x = (strtod (s.c_str(), &pEnd)) ;
         temp_point.y =(strtod (pEnd, NULL));
