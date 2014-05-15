@@ -18,7 +18,7 @@
 #define power_of_2(x) pow(2,x)
 
 /*Basic structure for data-points*/
-struct point     // CHANGE TO POINT
+struct point     
 {
     float x;
     float y;
@@ -227,9 +227,8 @@ void random_point(point pts[],int j,int s)
     std :: cout << "random index : " << r << std :: endl;
 
     /* Swapping elements with the random element selected*/
-    std :: cout << "X to be swapped" << pts[r].x << "," << pts[j].x << std::endl;
-    std :: cout << "Y to be swapped" << pts[r].y << "," << pts[j].y << std::endl;
-
+    std :: cout << pts[r].x << "," << pts[r].y << "swapped with " << pts[j].x << pts[j].y <<std::endl;
+    
     swap(&pts[r].x,&pts[j].x);
     swap(&pts[r].y,&pts[j].y);
 
@@ -400,8 +399,11 @@ void build_vp_tree (point pts[], int n)
                 t = t >> 1;
                 
                 /* Calculate position of pivot */
-                if ((f - l )< t) 
+                if ((f - l )< t)
+                { 
                     pp = t + f - l-1 ; //todo  (t+f-l-1 )
+                    std :: cout << "Pivot if it's not a full subtree: " << pp << std :: endl;
+                }
 
             }
 
@@ -421,7 +423,7 @@ void build_vp_tree (point pts[], int n)
                    from (pts.x[j], pts.y[j]) among the points in pts with indices [j+1, j+s-1], so it
                    chooses the desired pivot distance. */
 
-                select_by_distance(pts, j, s, pp-1, &pr);                    // TODO (priyank) : check if its pp-1 or pp to be the pivotal element.           
+                select_by_distance(pts, j, s, pp, &pr);                    // TODO (priyank) : check if its pp-1 or pp to be the pivotal element.           
                                                         
                
                                                                         
@@ -438,13 +440,16 @@ void build_vp_tree (point pts[], int n)
                 
             }
 
-            //Once the partition has been done, then save the elements in the vantage-point tree data structure.
+            std :: cout << "Values to be put in the vantage point tree" << std::endl;
+            //std :: cout << pts[j].x << "," << pts[j].y << std :: endl;
+                        //Once the partition has been done, then save the elements in the vantage-point tree data structure.
 
             /* Store current pivot in vp */
            // vp.x[i] = pts.x[j];                  // Check for the assignments which are made here and way they are made here.
            // vp.y[i] = pts.y[j];                  // Same here
             vp.x[i] = pts[j].x;
             vp.y[i] = pts[j].y;
+            std :: cout << vp.x[i] << "," << vp.y[i] << std :: endl;
             ++i;
             ++di;
 
@@ -479,10 +484,9 @@ int main()
 
 
     /* Extracting data from the .csv files to enable the build process */
-
     std::vector<point> points; // vector to temporarily store points
     std :: ifstream infile;
-    infile.open("../data/data.csv"); // open file
+    infile.open("../data/data.txt"); // open file
     if(infile)
     {
         std :: string s="";
@@ -490,7 +494,6 @@ int main()
         while(infile)
         {
         getline(infile,s);
-    
         char* pEnd;
         temp_point.x = (strtod (s.c_str(), &pEnd)) ;
         temp_point.y =(strtod (pEnd, NULL));
