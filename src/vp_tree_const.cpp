@@ -212,6 +212,9 @@ void partition_by_distance(point pts[],int j,int s, float pr)
 
 }
 
+
+
+
 /* Chooses a random index r in [j, j+s-1] and swaps pts.x[r] with pts.x[j] and pts.y[r] with 
 pts.y[j] */
 void random_point(point pts[],int j,int s)
@@ -300,6 +303,21 @@ void select_by_distance(point pts[], int j, int s, int pivot, float *pr)
    
 
 }
+void print_vp_tree(circle_list_t vp, int n)
+{
+
+    for (int i = 0; i < n; ++i)
+    {
+        
+    }
+
+}
+
+
+
+
+
+
 
  /*Partitions the points at indices [j+1, j+s-1] in pts so that the points at indices [j+1,j+pp-1] 
  have distance at most pr from (pts.x[j], pts.y[j]), while the points at indices [j+pp, j+s-1] 
@@ -307,13 +325,11 @@ void select_by_distance(point pts[], int j, int s, int pivot, float *pr)
  
 
 
-void build_vp_tree (point pts[], int n)
+void build_vp_tree (point pts[], int n, circle_list_t vp)
 {
     int sum=0;
     int fringe=0;  
     
-    /* The VP tree structure */
-    circle_list_t vp;
 
     /* n rounded down to the closest power of 2, also the number of leaves
        in the left subtree of the root if that subtree is in fact full */
@@ -347,12 +363,6 @@ void build_vp_tree (point pts[], int n)
     float px, py, pr;
 
     /* Allocate space for the arrays in the VP tree */
-
-    vp.n = n;
-    vp.x = (float*) malloc(((vp.n << 1) + (vp.n >> 1)) * sizeof(float)); // |____________(space fot x and y i.e.(vp.n * 2))_________|________space to store floor(n/2)__________________|
-    vp.y = vp.x + vp.n;                                                 // pointing to the point after space for x has been given                   
-    vp.r = vp.y + vp.n;                                                 // pointing to the point after the space allocated for the data points x,y have been covered followed by floor(n/2)
-    
 
     for (i = 0; i < n ;) // check for n. (TO DO)                      // i and ii tracks the current point in the vantage point tree.
     {
@@ -469,6 +479,13 @@ void build_vp_tree (point pts[], int n)
             
         }
     }
+
+
+
+    for (int i = 0; i < n; ++i)
+    {
+        std :: cout << vp.x[i] << "," << vp.y[i] << std :: endl;
+    }
 }
 
 
@@ -516,9 +533,18 @@ int main()
 
     /* Printing data */
     print(pts,n);
+        /* The VP tree structure */
+    circle_list_t vp;
 
+    vp.n = n;
+    vp.x = (float*) malloc(((vp.n << 1) + (vp.n >> 1)) * sizeof(float)); // |____________(space fot x and y i.e.(vp.n * 2))_________|________space to store floor(n/2)__________________|
+    vp.y = vp.x + vp.n;                                                 // pointing to the point after space for x has been given                   
+    vp.r = vp.y + vp.n;
     /* Calling the build process of the tree */
-    build_vp_tree(pts,n);
+    build_vp_tree(pts,n,vp);
+
+
+    print_vp_tree(vp,n);
 
 
 
