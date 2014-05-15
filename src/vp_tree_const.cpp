@@ -212,9 +212,6 @@ void partition_by_distance(point pts[],int j,int s, float pr)
 
 }
 
-
-
-
 /* Chooses a random index r in [j, j+s-1] and swaps pts.x[r] with pts.x[j] and pts.y[r] with 
 pts.y[j] */
 void random_point(point pts[],int j,int s)
