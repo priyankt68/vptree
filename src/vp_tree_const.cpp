@@ -78,16 +78,16 @@ void compute_distance( point pts[],int j, int s, float dist[])
 
     for ( int index = start ; index <= end; ++index)
     {   
-        dist[index] =  ((pts[index].x - pts[j].x)*(pts[index].x - pts[j].x)) + ((pts[index].y - pts[j].y)*(pts[index].y - pts[j].y)) ;    // dist array contains the  
+        dist[index] =  sqrt(((pts[index].x - pts[j].x)*(pts[index].x - pts[j].x)) + ((pts[index].y - pts[j].y)*(pts[index].y - pts[j].y))) ;    // dist array contains the  
     }   
-    std::cout << "compute_distance" << std::endl;
+   /* std::cout << "compute_distance" << std::endl;
     for (int i = start; i <= end ; ++i)
     {
-        std :: cout << i << ": " <<  dist [i] << std :: endl;
-    } 
+        std :: cout << i << ": " <<  dist [i] <<  " -- " <<pts[i].x  << "," << pts[i].y <<std :: endl;
+    }*/ 
 }
 
-int partition(float* input, int p, int r)
+int partition(float* input, point pts[], int p, int r)
 {
     float pivot = input[r];
     
@@ -109,6 +109,9 @@ int partition(float* input, int p, int r)
             float tmp = input[p];                     
             input[p] = input[r];
             input[r] = tmp;
+            swap(            &pts[p].x , &pts[r].x          );
+            swap(            &pts[p].y , &pts[r].y          );
+
         }
     }
     
@@ -116,19 +119,19 @@ int partition(float* input, int p, int r)
     return r;
 }
 
-float quick_select(float* input, int p, int r, int k)
+float quick_select(float* input, point pts[], int p, int r, int k)
 {
     if ( p == r ) return input[p];   // if the list just contains one element.
     
-    int j = partition(input, p, r);   // partition the elements with all elements
+    int j = partition(input,pts, p, r);   // partition the elements with all elements
 
     int length = j - p + 1;     // changing the length 
 
     if ( length == k )  return input[j];          // we've reached the element.
     
-    else if ( k < length ) return quick_select(input, p, j - 1, k);
+    else if ( k < length ) return quick_select(input,pts, p, j - 1, k);
 
-    else  return quick_select(input, j + 1, r, k - length);
+    else  return quick_select(input, pts,j + 1, r, k - length);
 }
 
 
@@ -204,13 +207,8 @@ for (int index = p; index <= r; ++index)
     }
     
     
-    
-  //  std :: cout << "dist\t" << "X\t" << "Y\t" << std :: endl;
-
- //    for (int index = j+1; index <= (j+s-1) ; ++index)
- //   {
-//        std::cout << distance_vector[index] << "\t" << pts[index].x << "\t" << pts[index].y << "\t" << std::endl ;
-   // }
+  
+    //print(pts,18);
 
 }
 
@@ -241,23 +239,16 @@ points in pts with indices [j, j+s-1], so it chooses the desired pivot distance.
   int end   = j+s-1;
    
    
-
-    //compute_distance( pts, j , s , dist );   // computing the distance array which contains the distance from the vantage point in the current subtree.
-      
-
-  //  float temp_dist[s-1];
-    
-    // for (int index = start ; index <= end; ++index)
-    //{
-      //  temp_dist[index] = dist[index] ;
-    //}    
-
-  
+ 
     int index_of_radii;   // index of the radii
 
-   *pr = quick_select(distance, j+1, j+s-1 , pivot);
+   *pr = quick_select(distance,pts, j+1, j+s-1 , pivot);
 
-    
+    std :: cout << "Printing points order" << std::endl;
+            for (int index = start ; index <= end; ++index)
+    {
+       std :: cout << distance[index]  << "::" <<pts[index].x << "," << pts[index].y << std:: endl;
+    }      
   //  std :: cout << pivot << "th smallest radii " << *pr << std :: endl;
 
      //std :: cout <<" Radius"  << *pr << std :: endl;
@@ -384,6 +375,7 @@ void build_vp_tree (point pts[], int n)
                 }
 
             }
+            /*
 std :: cout << "---------------------------"  << std :: endl;
         std :: cout << "j = " << j << std :: endl;
 
@@ -393,7 +385,7 @@ std :: cout << "---------------------------"  << std :: endl;
                     std :: cout << "l = " << l << std :: endl;
                     std :: cout << "i = " << i << std :: endl;
                      std :: cout << "di = " << di << std :: endl;
-
+*/
                     
             /* Partitioning is needed only if we have stuff to partition */
             if (s > 1) 
@@ -413,8 +405,19 @@ std :: cout << "---------------------------"  << std :: endl;
                compute_distance(pts, j, s, distance_vector);
 
                select_by_distance(pts, j, s, pp, &pr, distance_vector);                    // TODO (priyank) : check if its pp-1 or pp to be the pivotal element.           
-                                                        
-                                                                       
+             
+                std :: cout << "-----" << std:: endl;
+                for (int index = j+1 ; index <= j+s-1; ++index)
+                {
+                    std :: cout << distance_vector[index]  << "::" <<pts[index].x << "," << pts[index].y << std:: endl;
+                }                                          
+       
+             /*       std :: cout << "-----" << std:: endl;
+                    for (int index = j+1 ; index <= j+s-1; ++index)
+    {
+       std :: cout << distance_vector[index]  << "::" <<pts[index].x << "," << pts[index].y << std:: endl;
+    }                                          
+               */                                                              
 
                 /* 
                    Partitions the points at indices [j+1, j+s-1] in pts so that the points at indices
@@ -422,7 +425,14 @@ std :: cout << "---------------------------"  << std :: endl;
                    at indices [j+pp, j+s-1] have distance at least pr. */
 
                 partition_by_distance(pts, j, s, pr, distance_vector);  
-
+           std :: cout << "-----" << std:: endl;
+                    for (int index = j+1 ; index <= j+s-1; ++index)
+    {
+       std :: cout << distance_vector[index]  << "::" <<pts[index].x << "," << pts[index].y << std:: endl;
+    }                                          
+                 
+   //             std :: cout << "Printing points order" << std::endl;
+          //      print(pts,18);
                 /* Store the pivot radius in radius array of vp */
                 vp[i].r = pr;
                 std :: cout << "r= " << vp[i].r ;
@@ -473,7 +483,7 @@ std :: cout << "---------------------------"  << std :: endl;
 
             } else l += t;
 
-            
+           
         }
     }
    // std :: cout << "VP.Y[0] == "<< vp.y[0] << std :: endl;
