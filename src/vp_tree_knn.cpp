@@ -83,7 +83,8 @@ void nn_search(circle_list_t vp[], float qx, float qy, float *nnx, float *nny, i
     	{
         /* Calculate distance of query from node's point */
 		d = compute_distance(&vp[i].x, &vp[i].y, &qx, &qy);    // Compute distance between target and current node
-        std :: cout << " i =  "<< i << " d = " << d << " " << " t = " << t << " r = "<< vp[i].r <<  std :: endl;
+        std :: cout << " i =  "<< i << " d = " << d << " " << " t = " << t << 
+        " r = "<< vp[i].r <<  std :: endl;
 
         /* Do this if we came from the parent */
         if (j < i) 
