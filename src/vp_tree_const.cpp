@@ -25,11 +25,14 @@ struct point
 };
 
 /* Type to represent a list of circles */
-typedef struct {
+struct circle_list_t{
     //int n;
-    float x, y;
-    float r;
-} circle_list_t;
+    float *x, *y;
+    float *r;
+ 
+
+
+};
 
 
 /*                              UTILITY FUNCTIONS                          */
@@ -255,13 +258,13 @@ points in pts with indices [j, j+s-1], so it chooses the desired pivot distance.
 
 }
 
-void print_vp_tree(circle_list_t vp[], int n)
+void print_vp_tree(circle_list_t *vp, int n)
 {
     std :: cout << "Printing vp-tree" << std :: endl;
 
     for (int i = 0; i < n; ++i)
     {
-        std :: cout  << vp[i].x <<" " << vp[i].y << " "<< vp[i].r << " " << std :: endl; 
+        std :: cout  << vp->x[i] <<" " << vp->y[i] << " "<< vp->r[i] << " " << std :: endl; 
     }
 
 }
@@ -315,9 +318,13 @@ void build_vp_tree (point pts[], int n)
     /* Pivot point + radius */
     float px, py, pr;
 
-    circle_list_t vp[n];
-
-
+    circle_list_t *vp = new circle_list_t();  // this initialises the struct values to zero.
+    //Foo* f2 = new Foo();
+    //circle_list_t vp[n];
+    vp->x = (float *)malloc(((n*2) + (n)) * sizeof(float));
+    vp->y = vp->x + n;
+    vp->r = vp->y + n;
+    //return ;
 /*
 
     vp.n = n;
@@ -425,17 +432,17 @@ std :: cout << "---------------------------"  << std :: endl;
                    at indices [j+pp, j+s-1] have distance at least pr. */
 
                 partition_by_distance(pts, j, s, pr, distance_vector);  
-           std :: cout << "-----" << std:: endl;
-                    for (int index = j+1 ; index <= j+s-1; ++index)
-    {
-       std :: cout << distance_vector[index]  << "::" <<pts[index].x << "," << pts[index].y << std:: endl;
-    }                                          
+                std :: cout << "-----" << std:: endl;
+                for (int index = j+1 ; index <= j+s-1; ++index)
+                {
+                   std :: cout << distance_vector[index]  << "::" <<pts[index].x << "," << pts[index].y << std:: endl;
+                }                                          
                  
    //             std :: cout << "Printing points order" << std::endl;
           //      print(pts,18);
                 /* Store the pivot radius in radius array of vp */
-                vp[i].r = pr;
-                std :: cout << "r= " << vp[i].r ;
+                vp->r[i] = pr;
+                std :: cout << "r= " << vp->r[i] ;
             }
 
           //s  std :: cout << "Values to be put in the vantage point tree" << std::endl;
@@ -443,9 +450,9 @@ std :: cout << "---------------------------"  << std :: endl;
                 
           
           
-            vp[i].x = pts[j].x;
-            vp[i].y = pts[j].y;
-            std :: cout <<" :: " << "X = "<<vp[i].x << ", Y = " << vp[i].y << std :: endl;
+            vp->x[i] = pts[j].x;
+            vp->y[i] = pts[j].y;
+            std :: cout <<" :: " << "X = "<<vp->x[i] << ", Y = " << vp->y[i] << std :: endl;
             //std :: cout << vp.x[i] << "," << vp.y[i] << std :: endl;
             ++i;
             ++di;
@@ -458,7 +465,7 @@ std :: cout << "---------------------------"  << std :: endl;
 
 
             // std :: cout << "Value of j later" << j<<std :: endl;
-///std :: cout << "Value of i,  later" << i<<std :: endl;
+        ///std :: cout << "Value of i,  later" << i<<std :: endl;
           //  std :: cout << "Value of di later" << di <<std :: endl;
                 
              if ((l < f) && (l + t >= f) )
