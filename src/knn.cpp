@@ -109,6 +109,7 @@ int read_vp_tree_data(circle_list_t vp_tree[])
 			}
 	c++;
     }
+
   	infile.close();
 	return l;
 }
@@ -129,7 +130,7 @@ void nn_search(circle_list_t vp[], float qx, float qy,  int n, int k,std::priori
 	// /float t = compute_distance(&(vp[0].x), &(vp[0].y), &qx, &qy);
 	float t = 1000.99;
 	//std :: cout << t << std::endl;
-  // heap.push(HeapItem(t, 0, vp[0].x, vp[0].y)); 
+    // heap.push(HeapItem(t, 0, vp[0].x, vp[0].y)); 
 	//std :: cout <<"NN_x = " << *nnx << " NN_y = " << *nny << std:: endl; 
     while (i >= 0 )  
     {
@@ -210,7 +211,7 @@ int main(int argc, char const *argv[])
 	std :: cin >> k;
 	
 	int i=0;
-	std::vector<HeapItem> nn_results;
+	
 	while (query_size--)
 	{
 		 // Use a priority queue to store intermediate results on
@@ -222,31 +223,15 @@ int main(int argc, char const *argv[])
 		
 		while (!heap.empty())
   		{
-  			
-  /*			HeapItem temp(0,0,0,0);
-  			
-  			temp.dist = heap.top().dist ;
-  			temp.x = heap.top().x ;
-  			temp.y = heap.top().y;
-  			
-  			nn_results.push_back(temp);
-*/
-  			std :: cout << 
+  			std :: cout << heap.top().dist  << " :: " << heap.top().x << " , " << heap.top().y << std :: endl;
     	 	heap.pop();
-
     	 	std :: cout << "\n";
   		}
-  	/*	std::reverse(nn_results.begin(), nn_results.end());
-  		for(std::vector<HeapItem>::iterator it=nn_results.begin(); it!= nn_results.end(); ++it)
-        {   
-        	std :: cout << it->x << " , "<< it->y << " , "  << it->dist << std::endl;
-        }*/
+
 		i++;
 		std::cout << '\n';
 	}
 	
-		
-
 	return 0;
 }
 
