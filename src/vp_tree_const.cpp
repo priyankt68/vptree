@@ -276,7 +276,7 @@ void print_vp_tree(circle_list_t *vp, int n)
  
 
 
-void build_vp_tree (point pts[], int n)
+circle_list_t* build_vp_tree (point pts[], int n, circle_list_t *vp)
 {
     int sum=0;
     int fringe=0;  
@@ -318,12 +318,7 @@ void build_vp_tree (point pts[], int n)
     /* Pivot point + radius */
     float px, py, pr;
 
-    circle_list_t *vp = new circle_list_t();  // this initialises the struct values to zero.
-    //Foo* f2 = new Foo();
-    //circle_list_t vp[n];
-    vp->x = (float *)malloc(((n*2) + (n)) * sizeof(float));
-    vp->y = vp->x + n;
-    vp->r = vp->y + n;
+    
     //return ;
 /*
 
@@ -493,9 +488,7 @@ std :: cout << "---------------------------"  << std :: endl;
            
         }
     }
-   // std :: cout << "VP.Y[0] == "<< vp.y[0] << std :: endl;
-    print_vp_tree(vp,n);
-    
+  
 }
 
 
@@ -543,12 +536,17 @@ int main()
 
     /* Printing data */
     print(pts,n);
-        /* The VP tree structure */
+    circle_list_t *vp = new circle_list_t();  // this initialises the struct values to zero.
+    //Foo* f2 = new Foo();
     //circle_list_t vp[n];
-    /* Calling the build process of the tree */
-    build_vp_tree(pts,n);
+    vp->x = (float *)malloc(((n*2) + (n)) * sizeof(float));
+    vp->y = vp->x + n;
+    vp->r = vp->y + n;
 
-    //print_vp_tree(vp,n)
+    /* Calling the build process of the tree */
+    build_vp_tree(pts,n,vp);
+
+    print_vp_tree(vp,n);
     
 
 
