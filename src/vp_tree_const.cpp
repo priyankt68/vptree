@@ -9,6 +9,9 @@
 #include <string>
 #include <string.h>
 #include <math.h>
+#include <omp.h>
+
+#include <new>
 #include <vector>
 
 #define left(i)   ((i << 1) +1)
@@ -25,13 +28,11 @@ struct point
 };
 
 /* Type to represent a list of circles */
-struct circle_list_t{
+struct circle_list_t
+{
     //int n;
     float *x, *y;
     float *r;
- 
-
-
 };
 
 
@@ -44,12 +45,9 @@ float compare (const void * a, const void * b)
 }
 
 
-/*
-    Function to print the data-points
+/* Function to print the data-points */
 
-*/
-
-void print(point pts[], int n)
+void print_input_data(point pts[], int n)
 {
 
     for (int i = 0; i < n; ++i)
@@ -74,8 +72,6 @@ void swap(float *x, float *y)
 
 void compute_distance( point pts[],int j, int s, float dist[])
 {
-
-     //distance array
     int start = j+1;
     int end   = j+s-1;
 
@@ -83,19 +79,13 @@ void compute_distance( point pts[],int j, int s, float dist[])
     {   
         dist[index] =  sqrt(((pts[index].x - pts[j].x)*(pts[index].x - pts[j].x)) + ((pts[index].y - pts[j].y)*(pts[index].y - pts[j].y))) ;    // dist array contains the  
     }   
-   /* std::cout << "compute_distance" << std::endl;
-    for (int i = start; i <= end ; ++i)
-    {
-        std :: cout << i << ": " <<  dist [i] <<  " -- " <<pts[i].x  << "," << pts[i].y <<std :: endl;
-    }*/ 
-}
+ }
+
 
 int partition(float* input, point pts[], int p, int r)
 {
     float pivot = input[r];
-    
-  //  std :: cout << " Pivot element is : " << pivot << std :: endl;
-
+   
     while ( p < r )
     {
         while ( input[p] < pivot )
@@ -117,10 +107,10 @@ int partition(float* input, point pts[], int p, int r)
 
         }
     }
-    
-
+   
     return r;
 }
+
 
 float quick_select(float* input, point pts[], int p, int r, int k)
 {
@@ -143,11 +133,7 @@ float quick_select(float* input, point pts[], int p, int r, int k)
  have distance at least pr. */
 void partition_by_distance(point pts[], int j, int s, float pr, float distance[])
 {
-  /*
-    std::cout << "----------------------------------------- "<< std :: endl;
-    std::cout << "partition_by_distance" <<std :: endl;
-    std::cout << "----------------------------------------- " <<std :: endl;
-*/
+
     int p = j + 1;
     int r = j + s - 1;
   /*  std::cout << " p = " << p << std :: endl;
@@ -182,14 +168,12 @@ for (int index = p; index <= r; ++index)
     float temp = distance[index_of_radii];
     distance[index_of_radii] =  distance[r];
     distance[r] = temp;
-    //swap(&distance[index_of_radii] , &distance[r]);
-
+    
     swap(&pts[index_of_radii].x , &pts[r].x);
     swap(&pts[index_of_radii].y , &pts[r].y);
 
     float pivot = distance[r];
       
-
     while ( p < r )
     {
         while ( distance[p] < pivot )
@@ -209,17 +193,10 @@ for (int index = p; index <= r; ++index)
         }
     }
     
-    
-  
-    //print(pts,18);
-
 }
 
-
-
-
-/* Chooses a random index r in [j, j+s-1] and swaps pts.x[r] with pts.x[j] and pts.y[r] with 
-pts.y[j] */
+/* Chooses a random index r in [j, j+s-1] and swaps pts.x[r] with pts`.x[j] 
+and pts.y[r] with  pts.y[j] */
 void random_point(point pts[],int j,int s)
 {
    int r = (rand() % s ) + j;
@@ -238,23 +215,19 @@ points in pts with indices [j, j+s-1], so it chooses the desired pivot distance.
  void select_by_distance(point pts[], int j, int s, int pivot, float *pr, float distance[])  
 {
 
-  int start = j+1;
-  int end   = j+s-1;
-   
-   
- 
+    int start = j+1;
+    int end   = j+s-1;
+
     int index_of_radii;   // index of the radii
 
-   *pr = quick_select(distance,pts, j+1, j+s-1 , pivot);
+    *pr = quick_select(distance,pts, j+1, j+s-1 , pivot);
 
-    std :: cout << "Printing points order" << std::endl;
+  /*  std :: cout << "Printing points order" << std::endl;
             for (int index = start ; index <= end; ++index)
     {
        std :: cout << distance[index]  << "::" <<pts[index].x << "," << pts[index].y << std:: endl;
     }      
-  //  std :: cout << pivot << "th smallest radii " << *pr << std :: endl;
-
-     //std :: cout <<" Radius"  << *pr << std :: endl;
+    */
 
 }
 
@@ -269,20 +242,60 @@ void print_vp_tree(circle_list_t *vp, int n)
 
 }
 
+int read_input_data(point pts[])
+{   
+    std :: ifstream infile;
+    infile.open("../data/data.txt"); // open file
+    int i=0;
+
+    if(infile)
+        {  
+        
+        std :: string s="";
+        
+            while(infile)
+            {
+                getline(infile,s);
+                char* pEnd;
+                pts[i].x = (strtod (s.c_str(), &pEnd)) ;
+                pts[i].y = (strtod (pEnd, NULL));
+                i++;    
+            }
+        
+        }
+
+    infile.close();
+    
+      
+    return i-1;
+}
+
+void save_vp_tree(circle_list_t *vp, int n)
+{
+    std::ofstream MyFile;
+    MyFile.open ("../data/vp_tree_build.txt",std::ofstream::out | std::ofstream::trunc) ;
+    
+    for (int i=0;i<n;i++)
+    {
+        
+        MyFile << vp->x[i] << " " << vp->y[i] << " " << vp->r[i] << "\n";
+    }
+    
+MyFile.close();
+
+}
 
 /*Partitions the points at indices [j+1, j+s-1] in pts so that the points at indices [j+1,j+pp-1] 
  have distance at most pr from (pts.x[j], pts.y[j]), while the points at indices [j+pp, j+s-1] 
  have distance at least pr. */
  
-
-
 circle_list_t* build_vp_tree (point pts[], int n, circle_list_t *vp)
 {
     int sum=0;
     int fringe=0;  
     
 
-    /* Globa distance array*/
+    /* Global distance array*/
 
     float distance_vector[n];  // this distance array is accessed every time distance is calculated. No other distance vector is calculated again.
 
@@ -293,10 +306,7 @@ circle_list_t* build_vp_tree (point pts[], int n, circle_list_t *vp)
 
     /* Number of leaves in the "fringe" (last level) of the tree. */
     int f = n - t + 1;
-
-    /* Displaying the fring-size */
-    std :: cout << "fringe size for " << n << " data-points is "<< f << std :: endl ;
-
+  
     /* Index of current node in vp tree data structure with the structure type as circle_list_t*/
     int i, ii;
 
@@ -318,62 +328,39 @@ circle_list_t* build_vp_tree (point pts[], int n, circle_list_t *vp)
     /* Pivot point + radius */
     float px, py, pr;
 
-    
-    //return ;
-/*
-
-    vp.n = n;
-    vp.r = (float*) (malloc(vp.n) * sizeof(float)); // |____________(space fot x and y i.e.(vp.n * 2))_________|________space to store floor(n/2)__________________|
-*/
-    
-  
-        
-
-    for (i = 0; i < n ;) // check for n. (TO DO)                      // i and ii tracks the current point in the vantage point tree.
+    for (i = 0; i < n ;) 
     {
-
-        std :: cout << "-------------------------" << std::endl;
-        std :: cout << "Starting for the next node" << std::endl;
 
         /* Size of full subtree at current level */
         s = (t << 1) - 1;                                             
-
-        std :: cout << "Size of the full subtree: " << s << std :: endl;
-
+     
         /* Pivot position within a full subtree */
         pp = t - 1;                                                   
 
-        std::cout << "Pivot if it's a full sub-tree inside build process :"  << pp << std::endl ;
-
         /* We're starting at the leftmost leaf */
         l = 0;                                                        
-      di = 0;  
+        di = 0;  
         
        /* Calculate starting position of points array of leftmost subtree */
         for (j = 0, ii = i; ii; ii = ii >> 1,j++);                          // ii gets divided by two every time the iteration proceeds.       
         
-        std :: cout << "Value of J before while loop even begins" << j << std :: endl; 
-        std :: cout << "Value of i before while loop even begins" << i << std :: endl; 
-        std :: cout << "Value of ii before while loop even begins" << ii << std :: endl;
         /* Loop over subtrees at current level */
         while (j < n) 
         {
-            
-
             /* The transition subtree that may not be full needs special treatment */
             if (l < f && (l + t) >= f)
              {
 
                 /* Calculate subtree size */
-                s = t - 1 + f - l;   // <00000000000000000
-                std :: cout << "Subtree size :" << s << std :: endl;
+                s = t - 1 + f - l;  
+
                 /* Reduce fringe size for the remainder of this level (and for the next) */
                 
                 /* Calculate position of pivot */
                 if ((f - l ) < t>>1)
                 { 
                     pp = (t/2 - 1) + (f - l) ; //todo  (t+f-l-1 )
-                    std :: cout << "Pivot if it's not a full subtree: " << pp << std :: endl;
+
                 }
 
             }
@@ -408,12 +395,6 @@ std :: cout << "---------------------------"  << std :: endl;
 
                select_by_distance(pts, j, s, pp, &pr, distance_vector);                    // TODO (priyank) : check if its pp-1 or pp to be the pivotal element.           
              
-                std :: cout << "-----" << std:: endl;
-                for (int index = j+1 ; index <= j+s-1; ++index)
-                {
-                    std :: cout << distance_vector[index]  << "::" <<pts[index].x << "," << pts[index].y << std:: endl;
-                }                                          
-       
              /*       std :: cout << "-----" << std:: endl;
                     for (int index = j+1 ; index <= j+s-1; ++index)
     {
@@ -427,17 +408,13 @@ std :: cout << "---------------------------"  << std :: endl;
                    at indices [j+pp, j+s-1] have distance at least pr. */
 
                 partition_by_distance(pts, j, s, pr, distance_vector);  
-                std :: cout << "-----" << std:: endl;
-                for (int index = j+1 ; index <= j+s-1; ++index)
-                {
-                   std :: cout << distance_vector[index]  << "::" <<pts[index].x << "," << pts[index].y << std:: endl;
-                }                                          
+             
                  
    //             std :: cout << "Printing points order" << std::endl;
           //      print(pts,18);
                 /* Store the pivot radius in radius array of vp */
                 vp->r[i] = pr;
-                std :: cout << "r= " << vp->r[i] ;
+             
             }
 
           //s  std :: cout << "Values to be put in the vantage point tree" << std::endl;
@@ -447,7 +424,7 @@ std :: cout << "---------------------------"  << std :: endl;
           
             vp->x[i] = pts[j].x;
             vp->y[i] = pts[j].y;
-            std :: cout <<" :: " << "X = "<<vp->x[i] << ", Y = " << vp->y[i] << std :: endl;
+           
             //std :: cout << vp.x[i] << "," << vp.y[i] << std :: endl;
             ++i;
             ++di;
@@ -465,7 +442,7 @@ std :: cout << "---------------------------"  << std :: endl;
                 
              if ((l < f) && (l + t >= f) )
              {    //( l < f && (l + 2t >= f ) )
-                    std :: cout << "Inside the transition tree" << std:: endl;
+           //         std :: cout << "Inside the transition tree" << std:: endl;
 
                   // std :: cout << "s = " << s << std :: endl;
                    // std :: cout << "t = " << t << std :: endl;
@@ -476,13 +453,13 @@ std :: cout << "---------------------------"  << std :: endl;
                 pp = t - 1;
                 l = f;    
 
-
+/*
                    std :: cout << "s = " << s << std :: endl;
                     std :: cout << "t = " << t << std :: endl;
                     std :: cout << "pp = " << pp << std :: endl;
                     std :: cout << "l = " << l << std :: endl;
                     std :: cout << "di = " << di << std :: endl;
-
+*/
             } else l += t;
 
            
@@ -492,64 +469,49 @@ std :: cout << "---------------------------"  << std :: endl;
 }
 
 
-
-/*       MAIN()                   */
-/*________________________________*/
-
+//===== Main program ========================================================
 int main()
 {
 
 
-    /* Extracting data from the .csv files to enable the build process */
-    std::vector<point> points; // vector to temporarily store points
-    std :: ifstream infile;
-    infile.open("../data/data.txt"); // open file
-    if(infile)
-    {  
-        std :: string s="";
-        point temp_point;
-        while(infile)
-        {
-        getline(infile,s);
-        char* pEnd;
-        temp_point.x = (strtod (s.c_str(), &pEnd)) ;
-        temp_point.y =(strtod (pEnd, NULL));
-        points.push_back(temp_point);
-        }
-                
+
+    point *pts = new point[100];
+
+    if (pts == NULL)
+    {
+        std :: cout << "points not allocated" << std :: endl;
     }
 
-    /*Total number of points in the data*/
-    int n = points.size() - 1;  
+    int n = read_input_data(pts);
 
-    std :: cout << "Number of data points to process" << n << std::endl ;  
-
-    /*Declaring the structure of arrays for the data points to be stored.*/
-    point pts[n];
-    int i=0;
-    for(std::vector<point>::iterator it=points.begin(); it!=points.end(); ++it)
-        {   
-            pts[i].x =  it->x;
-            pts[i].y =  it->y;
-            i++;
-        }
-
-    /* Printing data */
-    print(pts,n);
-    circle_list_t *vp = new circle_list_t();  // this initialises the struct values to zero.
-    //Foo* f2 = new Foo();
-    //circle_list_t vp[n];
+    print_input_data(pts,n);                    /* Printing input data */
+//    circle_list_t *vp = new circle_list_t();  // this initialises the struct 
+      //values to zero.
+  
+/*
+    if (vp == NULL)
+    {
+        std :: cout << "points for vptree  not allocated" << std :: endl;   
+    }
     vp->x = (float *)malloc(((n*2) + (n)) * sizeof(float));
     vp->y = vp->x + n;
     vp->r = vp->y + n;
 
-    /* Calling the build process of the tree */
-    build_vp_tree(pts,n,vp);
-
-    print_vp_tree(vp,n);
     
+    double startp = omp_get_wtime();
 
+    build_vp_tree(pts,n,vp);       /* Calling the build process of the tree */
 
+//    double endp = omp_get_wtime();
 
-    return 0;
+  //  delete pts;
+   // std :: cout << "Build Process for " << n << " :: " << (endp - startp) << std :: endl;
+
+    //print_vp_tree(vp,n);           /* Printing VP tree */
+
+    //save_vp_tree(vp,n);            /* Saving VP tree to file */
+
+    //free(vp);
+
+   return 0;
 }
