@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <stdlib.h>
 #include <math.h>
 
 #define left(i)   ((i << 1) +1)
@@ -44,6 +46,7 @@ void print_vp_tree(circle_list_t vp[], int n)
     	std :: cout  << vp[i].x <<" " << vp[i].y << " "<< vp[i].r << " " << std :: endl; 
     }
 }
+
 void position_check(float x,float y, float p, float q, float r, int flag)
 {	
 
@@ -59,8 +62,9 @@ void position_check(float x,float y, float p, float q, float r, int flag)
 		{
 			
 		}
+		
 		// we're in the right sub-tree, check for greater than equal to condition
-		if (d<r && (d!=0 || r!=0))
+		if (d<=r && (x!=p && y!=q) )
 		{
 			std :: cout << "WRONG POSITION" << std:: endl;
 			std:: cout << "Distance : " << d << "|| " << x <<" " << y << std :: endl;			
@@ -73,9 +77,14 @@ void position_check(float x,float y, float p, float q, float r, int flag)
 		{
 			
 		}
-		if (d > r && (d!=0 || r!=0))
+		if(d==r)
 		{
-			std :: cout << "WRONG POSITION" << std:: endl;
+
+		}
+	
+		if (d > r )
+		{
+			std :: cout << "WRONG POSITION neechr" << std:: endl;
 			std:: cout << "Distance : " << d << "|| " << x <<" " << y <<  std :: endl;			
 		}	
 		
@@ -87,7 +96,7 @@ void position_check(float x,float y, float p, float q, float r, int flag)
 */	
 }
 
-void post_order_vp_tree(circle_list_t vp[], int nodeindex, int &i, int n, int root, int flag)
+void post_order_vp_tree(std::vector<circle_list_t>& vp, int nodeindex, int &i, int n, int root, int flag)
 {
 	if (nodeindex > n)
       	return ;	
@@ -97,8 +106,8 @@ void post_order_vp_tree(circle_list_t vp[], int nodeindex, int &i, int n, int ro
     
     if (vp[nodeindex].x == vp[root].x && vp[nodeindex].y == vp[root].y)
     {
-    	std:: cout << "\n\t|| RIGHT SUBTREE || "  << std:: endl;
-    	flag = 1;  // when the flag is one, we say that, yes we've entered the right side of my sub-tree.
+    	//std:: cout << "\n\t|| RIGHT SUBTREE || "  << std:: endl;
+    	flag = 1;  // when the flag is one, we say that, yes, we've entered the right side of my sub-tree.
     }
     
     position_check(vp[nodeindex].x , vp[nodeindex].y, vp[root].x, vp[root].y, vp[root].r,flag);
@@ -109,23 +118,59 @@ void post_order_vp_tree(circle_list_t vp[], int nodeindex, int &i, int n, int ro
 }
 
 
-void vp_tree_check(circle_list_t vp[], int n)
-{
-		
-}
-
-
 int main(int argc, char const *argv[])
 {
-	circle_list_t *vp_tree = new circle_list_t[50] ;
-	int n = read_data(vp_tree);  
-	//vp_tree_check(vp_tree,n);
+	/*Reading VP Tree data*/
+
+	std :: ifstream vp_infile;
+    vp_infile.open("../data/vp_tree_build_500.txt"); // open file
+
+    int vp_data_size;
+    if(vp_infile)
+    {   
+        std :: string s="";
+        getline(vp_infile,s);
+        
+        vp_data_size = atoi(s.c_str());
+        //std :: cout << vp_data_size << std :: endl;
+
+    }
+  //  std :: cout << vp_data_size << std :: endl;
+    std::vector<circle_list_t> vp(vp_data_size); // vector to temporarily store points   
+   
+   
+   int i=0;
+    int c = 0;
+    int l = 0;
+    while(!vp_infile.eof() )
+    {
+        if (c%3 == 0)   vp_infile >> vp[l].x;
+    
+        else if (c%3 == 1) vp_infile >> vp[l].y;
+        
+        else
+            {
+            vp_infile >> vp[l].r;
+            l++;
+            }
+    c++;
+    }
+
+    
+    
+
+    vp_infile.close();
+  
+	int n = vp_data_size;
+
+	std :: cout <<  n << std :: endl;
+	
 	int j=0;
 	for (int i = 0; i < n-1; ++i)
 	{	
 		std :: cout << "-----------------------\n" << std:: endl;
-		std:: cout << "\t\tRoot: "  << vp_tree[i].x <<" " << vp_tree[i].y << " "<< vp_tree[i].r << " " << std :: endl;
-		post_order_vp_tree(vp_tree,i,j,n-1,i,0);
+		std:: cout << "\t\tRoot: "  << vp[i].x <<" " << vp[i].y << " "<< vp[i].r << " " << std :: endl;
+		post_order_vp_tree(vp,i,j,n-1,i,0);
 	}
 	
 	return 0;

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <omp.h>
 #include <queue>
 #include <math.h>
 
@@ -42,7 +43,7 @@ float compute_distance(float *vp_x,float *vp_y,float *qx,float *qy)
 	
 }
 
- void print_vp_tree_data(circle_list_t vp_tree[],int n)
+ void print_vp_tree_data(std::vector<circle_list_t> vp_tree,int n)
  {
 	
 	for (int i=0;i<n; ++i)
@@ -52,7 +53,7 @@ float compute_distance(float *vp_x,float *vp_y,float *qx,float *qy)
 
  }
 
-void print_query_data(query_list query[],int n)
+void print_query_data(std::vector<query_list>& query,int n)
  {
 	
 	for (int i=0;i<n; ++i)
@@ -63,7 +64,7 @@ void print_query_data(query_list query[],int n)
  }
 
 
-int read_query_data(query_list query[])
+int read_query_data(std::vector<query_list>& query)
 {	
 
     std :: ifstream query_infile;
@@ -87,12 +88,44 @@ int read_query_data(query_list query[])
 
     return i-1;
 }
+int read_query_size()
+{
+    std :: ifstream infile;
+    infile.open("../data/query.txt"); // open file
+    int n;
+    if(infile)
+    {   
+         std :: string s="";
+        getline(infile,s);
+        
+        n = atoi(s.c_str());
+        
+    }
 
-int read_vp_tree_data(circle_list_t vp_tree[])
+    return n;
+}
+
+int read_vp_tree_size()
+{
+    std :: ifstream infile;
+    infile.open("../data/data.txt"); // open file
+    int n;
+    if(infile)
+    {   
+        std :: string s="";
+        getline(infile,s);
+        
+        n = atoi(s.c_str());
+        
+    }
+
+    return n;
+}
+int read_vp_tree_data(std::vector<circle_list_t> vp_tree)
 {
 	std :: ifstream infile;
     infile.open("../data/vp_tree_build.txt"); // open file
-    std::string line;
+   
 	int i=0;
  	int c = 0;
     int l = 0;
@@ -114,7 +147,7 @@ int read_vp_tree_data(circle_list_t vp_tree[])
 	return l;
 }
 
-void nn_search(circle_list_t vp[], float qx, float qy,  int n, int k,std::priority_queue<HeapItem>& heap)
+void nn_search(std::vector<circle_list_t>& vp, float qx, float qy,  int n, int k,std::priority_queue<HeapItem>& heap)
 {
 	
     /* Index of current node */
@@ -195,43 +228,132 @@ void nn_search(circle_list_t vp[], float qx, float qy,  int n, int k,std::priori
 int main(int argc, char const *argv[])
 {
 
-	float qx,qy;  // Query points
-	
-	query_list *query = new query_list[50];
+    int  k;
+    if (argc != 2)
+    {
+        std :: cout << "Usage " << argv[0] << " " << "k" << std :: endl;
+        exit(0);
+    }
+    else
+         k = atoi(argv[1]);
 
-	int query_size = read_query_data(query);
+    /*Reading Query data*/
+	std :: ifstream infile;
+    infile.open("../data/query.txt"); // open file
+    int query_size;
+    if(infile)
+    {   
+        std :: string s="";
+        getline(infile,s);
+        
+        
+        query_size = atoi(s.c_str());
+     //   std :: cout << query_size << std :: endl;
 
-	//print_query_data(query,query_size);	
-	
-	circle_list_t *vp_tree = new circle_list_t[50];
-	
-	int n = read_vp_tree_data(vp_tree);  
-	int k;
-	std :: cout << "Enter the value of k" << std :: endl;
-	std :: cin >> k;
-	
-	int i=0;
-	
+    }
+
+    std::vector<query_list> query(query_size); 
+        int i=0;
+        while(i<query_size)
+        { 
+        std :: string s="";
+         
+        getline(infile,s);
+
+        char* pEnd;
+
+        query[i].x = (strtod (s.c_str(), &pEnd)) ;
+        query[i].y =(strtod (pEnd, NULL));
+        i++;
+        }
+    
+
+    infile.close();
+
+
+  //  print_query_data(query,query_size);
+
+
+
+    /*Reading VP Tree data*/
+
+	std :: ifstream vp_infile;
+    vp_infile.open("../data/vp_tree_build.txt"); // open file
+    int vp_data_size;
+    if(vp_infile)
+    {   
+        std :: string s="";
+        getline(vp_infile,s);
+        
+        vp_data_size = atoi(s.c_str());
+        //std :: cout << vp_data_size << std :: endl;
+
+    }
+  //  std :: cout << vp_data_size << std :: endl;
+    std::vector<circle_list_t> vp(vp_data_size); // vector to temporarily store points   
+
+    
+    
+   
+    i=0;
+    int c = 0;
+    int l = 0;
+    while(!vp_infile.eof() )
+    {
+        if (c%3 == 0)   vp_infile >> vp[l].x;
+    
+        else if (c%3 == 1) vp_infile >> vp[l].y;
+        
+        else
+            {
+            vp_infile >> vp[l].r;
+            l++;
+            }
+    c++;
+    }
+
+    
+    
+
+    vp_infile.close();
+    
+
+    //print_vp_tree_data(vp,vp_data_size);
+
+
+    int iteration = query_size;
+    	
+	double startp = omp_get_wtime();
 	while (query_size--)
 	{
 		 // Use a priority queue to store intermediate results on
-        std::priority_queue<HeapItem> heap;
+    std::priority_queue<HeapItem> heap;
 
-		nn_search(vp_tree,query[i].x,query[i].y,n,k,heap);
+    
 
-		std :: cout << query[i].x << "," << query[i].y << std :: endl;
-		
+    nn_search(vp,query[i].x,query[i].y,vp_data_size,k,heap);
+
+    
+
+
+
+
+//		std :: cout << query[i].x << "," << query[i].y << std :: endl;
+		/*
 		while (!heap.empty())
   		{
   			std :: cout << heap.top().dist  << " :: " << heap.top().x << " , " << heap.top().y << std :: endl;
     	 	heap.pop();
     	 	std :: cout << "\n";
   		}
-
+*/
 		i++;
-		std::cout << '\n';
+//		std::cout << '\n';
 	}
-	
+	double endp = omp_get_wtime();
+
+    std :: cout << iteration << " " << endp - startp << std :: endl;
+
 	return 0;
 }
 
